@@ -1,0 +1,16 @@
+application: pulltabs
+runtime: go
+api_version: go1
+version: 1
+
+handlers:
+  - url: /favicon.ico
+    static_files: static/favicon.ico
+    upload: static/facicon.ico
+  - url: /robots.txt
+    static_files: static/robots.txt
+    upload: static/robots.txt
+  - url: /
+    script: _go_app
+  - url: /payload
+    script: _go_app
