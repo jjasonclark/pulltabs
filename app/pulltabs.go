@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"appengine"
@@ -54,7 +55,7 @@ type slackMessage struct {
 	Attachments []Attachment `json:"attachments"`
 }
 
-func (s notifier) output(pr pullRequestPost) (*bytes.Buffer, error) {
+func (s notifier) output(pr pullRequestPost) (string, error) {
 	m := slackMessage{
 		Text: s.Message,
 		Attachments: []Attachment{
@@ -68,11 +69,12 @@ func (s notifier) output(pr pullRequestPost) (*bytes.Buffer, error) {
 			},
 		},
 	}
-	b := bytes.NewBuffer(make([]byte, 2048))
+	var buf []byte
+	b := bytes.NewBuffer(buf)
 	if err := json.NewEncoder(b).Encode(&m); err != nil {
-		return nil, err
+		return "", err
 	}
-	return b, nil
+	return b.String(), nil
 }
 
 func (s notifier) validHMAC(req *http.Request, body []byte) bool {
@@ -150,7 +152,9 @@ func (s notifier) postSlackMessage(c appengine.Context, pr pullRequestPost) {
 		c.Infof("Failed to create message for request %s", reqID)
 		return
 	}
-	r, err := client.Post(s.SlackURL, "application/json; charset=UTF-8", b)
+	data := url.Values{}
+	data.Set("payload", b)
+	r, err := client.PostForm(s.SlackURL, data)
 	if err != nil {
 		c.Infof("Failed to post Slack message for request %s. Error: %s", reqID, err)
 		return
