@@ -42,17 +42,17 @@ type pullRequestPost struct {
 }
 
 type Attachment struct {
-	Fallback  string `json:"fallback"`
-	Color     string `json:"color"`
-	Pretext   string `json:"pretext"`
-	Title     string `json:"title"`
-	TitleLink string `json:"title_link"`
-	Text      string `json:"text"`
+	Fallback  string `json:"fallback,omitempty"`
+	Color     string `json:"color,omitempty"`
+	Pretext   string `json:"pretext,omitempty"`
+	Title     string `json:"title,omitempty"`
+	TitleLink string `json:"title_link,omitempty"`
+	Text      string `json:"text,omitempty"`
 }
 
 type slackMessage struct {
 	Text        string       `json:"text"`
-	Attachments []Attachment `json:"attachments"`
+	Attachments []Attachment `json:"attachments,omitempty"`
 }
 
 func (s notifier) output(pr pullRequestPost) (string, error) {
@@ -60,10 +60,7 @@ func (s notifier) output(pr pullRequestPost) (string, error) {
 		Text: s.Message,
 		Attachments: []Attachment{
 			Attachment{
-				Text:      "Review me please",
 				Color:     "good",
-				Fallback:  s.Message,
-				Pretext:   fmt.Sprintf("Pull request tagged with %s", s.Label),
 				Title:     pr.PullRequest.Title,
 				TitleLink: pr.PullRequest.HTMLURL,
 			},
